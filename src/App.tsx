@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
-import { copyFile } from "@tauri-apps/plugin-fs";
 
 const MAX_TEXT_LENGTH = 5000;
 
@@ -57,7 +56,10 @@ function App() {
       });
 
       if (targetPath) {
-        await copyFile(mp3Path, targetPath);
+        await invoke("save_audio", {
+          source: mp3Path,
+          target: targetPath,
+        });
         setStatus(`已保存到: ${targetPath}`);
       }
     } catch (err) {
