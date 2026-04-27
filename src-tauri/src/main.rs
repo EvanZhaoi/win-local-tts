@@ -5,7 +5,8 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 use std::time::SystemTime;
-use tauri::{AppHandle, Manager, BaseDirectory};
+use tauri::{AppHandle, Manager};
+use tauri::path::BaseDirectory;
 
 /// 从 Tauri 资源目录或 Path 获取 ffmpeg 路径
 fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
@@ -183,4 +184,8 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("启动 Tauri 应用失败");
+}
+
+fn main() {
+    run();
 }
