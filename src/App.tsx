@@ -11,10 +11,12 @@ function App() {
   const [status, setStatus] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [mp3Path, setMp3Path] = useState("");
+  const [audioUrl, setAudioUrl] = useState("");
 
   const handleClear = () => {
     setText("");
     setMp3Path("");
+    setAudioUrl("");
     setStatus("");
   };
 
@@ -32,6 +34,7 @@ function App() {
     setIsGenerating(true);
     setStatus("");
     setMp3Path("");
+    setAudioUrl("");
 
     try {
       const result = await invoke<string>("generate_speech", {
@@ -41,7 +44,13 @@ function App() {
       });
 
       setMp3Path(result);
-      setStatus("语音生成成功，可以保存 MP3");
+
+      const base64 = await invoke<string>("read_audio_base64", {
+        path: result,
+      });
+      setAudioUrl(`data:audio/mpeg;base64,${base64}`);
+
+      setStatus("语音生成成功，可以试听或保存 MP3");
     } catch (err) {
       setStatus(`生成失败: ${err}`);
     } finally {
@@ -147,13 +156,19 @@ function App() {
           >
             {isGenerating ? "生成中..." : "生成 MP3"}
           </button>
-
-          {mp3Path && (
-            <button className="btn btn-secondary" onClick={handleSave}>
-              保存 MP3
-            </button>
-          )}
         </div>
+
+        {audioUrl && (
+          <div className="audio-player">
+            <audio controls src={audioUrl} />
+          </div>
+        )}
+
+        {mp3Path && (
+          <button className="btn btn-secondary" onClick={handleSave}>
+            保存 MP3
+          </button>
+        )}
 
         {status && (
           <div className={`status ${getStatusClass()}`}>
