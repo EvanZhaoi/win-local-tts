@@ -31,7 +31,7 @@
 
 ### 下载步骤
 
-1. 下载地址：https://github.com/GyanD/codexffmpeg/releases/download/7.1/ffmpeg-7.1-full_build.zip
+1. 下载地址：https://github.com/GyanD/codexffmpeg/releases/download/8.0.1/ffmpeg-8.0.1-full_build.zip
 
 2. 解压得到 `ffmpeg-*-full_build/bin/ffmpeg.exe`
 
