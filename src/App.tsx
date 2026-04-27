@@ -12,6 +12,12 @@ function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [mp3Path, setMp3Path] = useState("");
 
+  const handleClear = () => {
+    setText("");
+    setMp3Path("");
+    setStatus("");
+  };
+
   const handleGenerate = async () => {
     if (!text.trim()) {
       setStatus("请输入要转换的文字");
@@ -24,7 +30,7 @@ function App() {
     }
 
     setIsGenerating(true);
-    setStatus("正在生成语音...");
+    setStatus("");
     setMp3Path("");
 
     try {
@@ -64,30 +70,44 @@ function App() {
     }
   };
 
+  const getStatusClass = () => {
+    if (status.includes("成功")) return "status-success";
+    if (status.includes("失败")) return "status-error";
+    if (isGenerating || status.includes("生成中")) return "status-info";
+    return "status-info";
+  };
+
   return (
     <div className="container">
-      <header>
-        <h1>🎙️ Windows 本地 TTS</h1>
-        <p>完全本地运行，不调用任何云接口</p>
-      </header>
-
       <div className="card">
+        <div className="header">
+          <h1>Windows 本地文字转语音</h1>
+          <p>完全离线 · 使用系统语音 · 本地生成 MP3</p>
+        </div>
+
         <div className="form-group">
-          <label htmlFor="text">输入文字</label>
+          <div className="form-label">
+            <span className="form-label-text">输入文字</span>
+          </div>
+          <div className="clear-row">
+            <button className="btn-clear" onClick={handleClear}>清空</button>
+          </div>
           <textarea
-            id="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="请输入要转换为语音的文字..."
             maxLength={MAX_TEXT_LENGTH}
           />
-          <div className="chars">{text.length} / {MAX_TEXT_LENGTH}</div>
+          <div className="chars-count">{text.length} / {MAX_TEXT_LENGTH}</div>
         </div>
 
         <div className="form-group">
-          <label>语速: {rate}（范围 -10 到 10）</label>
-          <div className="range-group">
-            <span>-10</span>
+          <div className="form-label">
+            <span className="form-label-text">语速</span>
+            <span className="form-label-value">{rate}</span>
+          </div>
+          <div className="range-control">
+            <span className="range-label">慢</span>
             <input
               type="range"
               min="-10"
@@ -96,14 +116,17 @@ function App() {
               value={rate}
               onChange={(e) => setRate(Number(e.target.value))}
             />
-            <span>10</span>
+            <span className="range-label">快</span>
           </div>
         </div>
 
         <div className="form-group">
-          <label>音量: {volume}%（范围 0 到 100）</label>
-          <div className="range-group">
-            <span>0</span>
+          <div className="form-label">
+            <span className="form-label-text">音量</span>
+            <span className="form-label-value">{volume}%</span>
+          </div>
+          <div className="range-control">
+            <span className="range-label">低</span>
             <input
               type="range"
               min="0"
@@ -112,41 +135,35 @@ function App() {
               value={volume}
               onChange={(e) => setVolume(Number(e.target.value))}
             />
-            <span>100</span>
+            <span className="range-label">高</span>
           </div>
         </div>
 
-        <button
-          className="btn"
-          onClick={handleGenerate}
-          disabled={isGenerating}
-        >
-          {isGenerating ? "生成中..." : "生成语音"}
-        </button>
-
-        {mp3Path && (
-          <button className="btn btn-secondary" onClick={handleSave}>
-            保存 MP3
+        <div className="btn-group">
+          <button
+            className="btn btn-primary"
+            onClick={handleGenerate}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "生成中..." : "生成 MP3"}
           </button>
-        )}
+
+          {mp3Path && (
+            <button className="btn btn-secondary" onClick={handleSave}>
+              保存 MP3
+            </button>
+          )}
+        </div>
 
         {status && (
-          <div
-            className={`status ${
-              status.includes("失败") || status.includes("过长")
-                ? "error"
-                : status.includes("成功")
-                ? "success"
-                : "info"
-            }`}
-          >
+          <div className={`status ${getStatusClass()}`}>
             {status}
           </div>
         )}
       </div>
 
       <div className="footer">
-        <p>使用 Windows 系统自带语音 · 内置 ffmpeg 转 MP3</p>
+        使用 Windows 系统自带语音 · 内置 ffmpeg 转 MP3
       </div>
     </div>
   );
