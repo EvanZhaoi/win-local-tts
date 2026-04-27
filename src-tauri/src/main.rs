@@ -7,6 +7,7 @@ use std::process::Command;
 use std::time::SystemTime;
 use tauri::{AppHandle, Manager};
 use tauri::path::BaseDirectory;
+use base64::{engine::general_purpose, Engine as _};
 
 /// 从 Tauri 资源目录或 Path 获取 ffmpeg 路径
 fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
@@ -164,11 +165,18 @@ async fn save_audio(source: String, target: String) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn read_audio_base64(path: String) -> Result<String, String> {
+    let bytes = std::fs::read(&path).map_err(|e| format!("读取音频失败: {}", e))?;
+    let encoded = general_purpose::STANDARD.encode(bytes);
+    Ok(encoded)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![generate_speech, save_audio])
+        .invoke_handler(tauri::generate_handler![generate_speech, save_audio, read_audio_base64])
         .setup(|app| {
             let temp_dir = std::env::temp_dir().join("win_local_tts");
             let _ = fs::create_dir_all(&temp_dir);

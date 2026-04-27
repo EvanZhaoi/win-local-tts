@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { convertFileSrc } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 
 const MAX_TEXT_LENGTH = 5000;
@@ -37,7 +36,13 @@ function App() {
       });
 
       setMp3Path(result);
-      setAudioUrl(convertFileSrc(result));
+
+      // 使用 base64 读取音频，避免 convertFileSrc 权限问题
+      const base64 = await invoke<string>("read_audio_base64", {
+        path: result,
+      });
+      setAudioUrl(`data:audio/mpeg;base64,${base64}`);
+
       setStatus("语音生成成功！");
     } catch (err) {
       setStatus(`生成失败: ${err}`);
