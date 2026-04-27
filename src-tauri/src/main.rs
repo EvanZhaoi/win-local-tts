@@ -154,7 +154,6 @@ async fn save_audio(source: String, target: String) -> Result<(), String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![generate_speech, save_audio])
         .setup(|app| {
             let temp_dir = std::env::temp_dir().join("win_local_tts");

@@ -47,12 +47,6 @@
     ]
   },
   "plugins": {
-    "dialog": {},
-    "fs": {
-      "scope": {
-        "allow": ["$TEMP/**", "$DOCUMENT/**", "$DOWNLOAD/**"],
-        "deny": []
-      }
-    }
+    "dialog": {}
   }
 }
