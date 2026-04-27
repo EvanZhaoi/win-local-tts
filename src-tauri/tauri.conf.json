@@ -45,8 +45,5 @@
     "resources": [
       "binaries/*"
     ]
-  },
-  "plugins": {
-    "dialog": {}
   }
 }
