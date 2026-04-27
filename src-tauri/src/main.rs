@@ -9,10 +9,18 @@ use tauri::{AppHandle, Manager, BaseDirectory};
 
 /// 从 Tauri 资源目录或 Path 获取 ffmpeg 路径
 fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
-    // 优先使用 Tauri 内置资源 (bundle 目录下的 binaries)
-    if let Ok(res_path) = app.path().resolve("binaries/ffmpeg-x86_64-pc-windows-msvc.exe", BaseDirectory::Resource) {
-        if res_path.exists() {
-            return Ok(res_path);
+    // 尝试多个可能的路径
+    let candidates = [
+        "binaries/ffmpeg-x86_64-pc-windows-msvc.exe",
+        "binaries/ffmpeg.exe",
+        "binaries/ffmpeg",
+    ];
+
+    for candidate in &candidates {
+        if let Ok(res_path) = app.path().resolve(candidate, BaseDirectory::Resource) {
+            if res_path.exists() {
+                return Ok(res_path);
+            }
         }
     }
 
@@ -22,6 +30,11 @@ fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
         let ffmpeg = PathBuf::from(dir).join("ffmpeg.exe");
         if ffmpeg.exists() {
             return Ok(ffmpeg);
+        }
+        // 也尝试不带 .exe 的版本
+        let ffmpeg_no_ext = PathBuf::from(dir).join("ffmpeg");
+        if ffmpeg_no_ext.exists() {
+            return Ok(ffmpeg_no_ext);
         }
     }
 
