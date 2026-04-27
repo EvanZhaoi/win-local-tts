@@ -7,8 +7,11 @@
     "core:default",
     "dialog:default",
     "fs:default",
-    "fs:allow-temp",
-    "fs:allow-document",
-    "fs:allow-download"
+    "fs:allow-temp-read",
+    "fs:allow-temp-write",
+    "fs:allow-document-read",
+    "fs:allow-document-write",
+    "fs:allow-download-read",
+    "fs:allow-download-write"
   ]
 }
