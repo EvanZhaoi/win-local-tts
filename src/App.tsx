@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 
@@ -11,8 +11,6 @@ function App() {
   const [status, setStatus] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [mp3Path, setMp3Path] = useState("");
-  const [audioUrl, setAudioUrl] = useState("");
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleGenerate = async () => {
     if (!text.trim()) {
@@ -27,6 +25,7 @@ function App() {
 
     setIsGenerating(true);
     setStatus("正在生成语音...");
+    setMp3Path("");
 
     try {
       const result = await invoke<string>("generate_speech", {
@@ -36,14 +35,7 @@ function App() {
       });
 
       setMp3Path(result);
-
-      // 使用 base64 读取音频，避免 convertFileSrc 权限问题
-      const base64 = await invoke<string>("read_audio_base64", {
-        path: result,
-      });
-      setAudioUrl(`data:audio/mpeg;base64,${base64}`);
-
-      setStatus("语音生成成功！");
+      setStatus("语音生成成功，可以保存 MP3");
     } catch (err) {
       setStatus(`生成失败: ${err}`);
     } finally {
@@ -132,15 +124,10 @@ function App() {
           {isGenerating ? "生成中..." : "生成语音"}
         </button>
 
-        {audioUrl && (
-          <>
-            <div className="audio-player">
-              <audio ref={audioRef} controls src={audioUrl} />
-            </div>
-            <button className="btn btn-secondary" onClick={handleSave}>
-              保存 MP3
-            </button>
-          </>
+        {mp3Path && (
+          <button className="btn btn-secondary" onClick={handleSave}>
+            保存 MP3
+          </button>
         )}
 
         {status && (
