@@ -25,7 +25,7 @@ fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
         }
     }
 
-    Err("未找到 ffmpeg.exe，请确保应用已正确安装".to_string())
+    Err("未找到 ffmpeg.exe，请先下载并放入 src-tauri/binaries/ 目录\n下载地址: https://github.com/GyanD/codexffmpeg/releases/download/7.1/ffmpeg-7.1-full_build.zip\n解压后将 bin/ffmpeg.exe 重命名为 ffmpeg-x86_64-pc-windows-msvc.exe 放入 src-tauri/binaries/".to_string())
 }
 
 /// 生成唯一的临时文件名
