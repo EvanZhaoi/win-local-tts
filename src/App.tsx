@@ -3,6 +3,47 @@ import { invoke } from "@tauri-apps/api/core";
 import { save } from "@tauri-apps/plugin-dialog";
 
 const MAX_TEXT_LENGTH = 5000;
+const APP_VERSION = "1.0.0";
+
+// 接口地址占位，以后替换成真实地址
+const REPORT_API_URL = "https://your-server.example.com/api/tts/usage-report";
+
+/**
+ * 获取当前用户信息（占位，以后替换成真实登录人信息）
+ */
+async function getCurrentUser() {
+  return {
+    id: "local-user",
+    name: "本地用户",
+  };
+}
+
+/**
+ * 上报使用记录（异步，不影响本地功能）
+ */
+async function reportUsage() {
+  try {
+    const user = await getCurrentUser();
+    await fetch(REPORT_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user,
+        event: "GENERATE_MP3",
+        usedAt: new Date().toISOString(),
+        client: {
+          app: "win-local-tts",
+          version: APP_VERSION,
+          platform: "windows",
+        },
+      }),
+    });
+  } catch (error) {
+    console.warn("使用记录上报失败，但不影响本地功能", error);
+  }
+}
 
 function App() {
   const [text, setText] = useState("");
@@ -51,6 +92,9 @@ function App() {
       setAudioUrl(`data:audio/mpeg;base64,${base64}`);
 
       setStatus("语音生成成功，可以试听或保存 MP3");
+
+      // 上报使用记录（异步，不阻塞本地功能）
+      reportUsage();
     } catch (err) {
       setStatus(`生成失败: ${err}`);
     } finally {
