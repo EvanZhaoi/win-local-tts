@@ -172,11 +172,21 @@ async fn read_audio_base64(path: String) -> Result<String, String> {
     Ok(encoded)
 }
 
+#[tauri::command]
+fn get_system_user() -> Result<String, String> {
+    if let Ok(user) = std::env::var("USERNAME") {
+        if !user.trim().is_empty() {
+            return Ok(user);
+        }
+    }
+    Ok("unknown".to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![generate_speech, save_audio, read_audio_base64])
+        .invoke_handler(tauri::generate_handler![generate_speech, save_audio, read_audio_base64, get_system_user])
         .setup(|app| {
             let temp_dir = std::env::temp_dir().join("win_local_tts");
             let _ = fs::create_dir_all(&temp_dir);

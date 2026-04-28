@@ -9,13 +9,22 @@ const APP_VERSION = "1.0.0";
 const REPORT_API_URL = "https://your-server.example.com/api/tts/usage-report";
 
 /**
- * 获取当前用户信息（占位，以后替换成真实登录人信息）
+ * 获取当前 Windows 登录用户
  */
 async function getCurrentUser() {
-  return {
-    id: "local-user",
-    name: "本地用户",
-  };
+  try {
+    const name = await invoke<string>("get_system_user");
+    return {
+      id: name,
+      name: name,
+    };
+  } catch (e) {
+    console.warn("获取系统用户失败，使用默认值", e);
+    return {
+      id: "unknown",
+      name: "unknown",
+    };
+  }
 }
 
 /**
