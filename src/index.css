@@ -1,42 +1,109 @@
+/**
+ * ============================================================================
+ * WinLocalTTS - 样式文件
+ * ============================================================================
+ * 
+ * 样式特点：
+ * - 卡片式布局，居中显示
+ * - 现代化配色方案（蓝色主色调）
+ * - 响应式设计，适配移动端
+ * 
+ * 配色方案：
+ * - 主色（蓝色）: #2563EB
+ * - 成功（绿色）: #16A34A
+ * - 错误（红色）: #DC2626
+ * - 背景色: #F6F8FB
+ * - 卡片色: #FFFFFF
+ * - 文字色: #111827
+ * - 次级文字: #6B7280
+ * - 边框色: #E5E7EB
+ */
+
+/* ============================================================================
+   重置样式和基础设置
+   ============================================================================ */
+
+/**
+ * 通配符选择器
+ * 统一所有元素的盒模型计算方式
+ */
 * {
-  box-sizing: border-box;
+  box-sizing: border-box;  /* 边框和内边距包含在元素尺寸内 */
   margin: 0;
   padding: 0;
 }
 
+/**
+ * body 样式
+ * 设置全局字体、背景色、文字颜色
+ */
 body {
+  /* 字体：优先使用系统字体 */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  
+  /* 浅灰色背景 */
   background: #F6F8FB;
+  
+  /* 深色文字 */
   color: #111827;
+  
+  /* 最小高度为视口高度，确保内容居中 */
   min-height: 100vh;
+  
+  /* 文字抗锯齿 */
   -webkit-font-smoothing: antialiased;
 }
 
+/**
+ * #root 容器样式
+ * 弹性布局，使内容垂直居中
+ */
 #root {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
-  padding: 40px 20px;
+  justify-content: center;  /* 水平居中 */
+  padding: 40px 20px;      /* 上下 40px，左右 20px */
 }
 
+/* ============================================================================
+   容器和卡片布局
+   ============================================================================ */
+
+/**
+ * 主容器
+ * 限制最大宽度为 600px
+ */
 .container {
   width: 100%;
   max-width: 600px;
 }
 
+/**
+ * 卡片样式
+ * 白色背景、圆角、阴影
+ */
 .card {
-  background: #FFFFFF;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+  background: #FFFFFF;  /* 白色背景 */
+  border-radius: 12px;  /* 圆角 12px */
+  padding: 32px;        /* 内边距 32px */
+  
+  /* 阴影效果：多层阴影增加层次感 */
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.08),   /* 轻微阴影 */
+    0 4px 12px rgba(0, 0, 0, 0.04);  /* 较大范围淡阴影 */
 }
 
-/* Header */
+/* ============================================================================
+   标题区域样式
+   ============================================================================ */
+
+/** 标题容器：居中、下边距 */
 .header {
   text-align: center;
   margin-bottom: 28px;
 }
 
+/** 主标题：大号加粗 */
 .header h1 {
   font-size: 24px;
   font-weight: 700;
@@ -44,65 +111,97 @@ body {
   margin-bottom: 8px;
 }
 
+/** 副标题：小号灰色 */
 .header p {
   font-size: 14px;
   color: #6B7280;
 }
 
-/* Form groups */
+/* ============================================================================
+   表单区域样式
+   ============================================================================ */
+
+/**
+ * 表单分组
+ * 每个表单项之间的间距
+ */
 .form-group {
   margin-bottom: 24px;
 }
 
+/** 最后一个表单分组无下边距 */
 .form-group:last-child {
   margin-bottom: 0;
 }
 
+/**
+ * 表单标签行
+ * 使用 flexbox 布局：左右分布
+ */
 .form-label {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: space-between;  /* 两端对齐 */
+  align-items: center;            /* 垂直居中 */
   margin-bottom: 10px;
 }
 
+/** 表单标签文字 */
 .form-label-text {
   font-size: 14px;
   font-weight: 600;
   color: #374151;
 }
 
+/** 表单标签数值（右侧显示当前值） */
 .form-label-value {
   font-size: 14px;
   font-weight: 600;
-  color: #2563EB;
+  color: #2563EB;  /* 蓝色高亮 */
 }
 
-/* Textarea */
+/* ============================================================================
+   文本输入框样式
+   ============================================================================ */
+
+/**
+ * textarea 基础样式
+ */
 textarea {
-  width: 100%;
-  height: 140px;
-  padding: 14px;
-  background: #FFFFFF;
-  border: 1.5px solid #E5E7EB;
-  border-radius: 8px;
-  font-size: 15px;
-  font-family: inherit;
-  color: #111827;
-  resize: vertical;
+  width: 100%;          /* 占满容器宽度 */
+  height: 140px;        /* 固定高度 */
+  padding: 14px;        /* 内边距 */
+  background: #FFFFFF;  /* 白色背景 */
+  border: 1.5px solid #E5E7EB;  /* 浅灰色边框 */
+  border-radius: 8px;   /* 圆角 */
+  font-size: 15px;      /* 字体大小 */
+  font-family: inherit; /* 继承 body 字体 */
+  color: #111827;       /* 文字颜色 */
+  resize: vertical;      /* 只允许垂直调整大小 */
+  
+  /* 过渡效果：边框和阴影颜色变化 */
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  line-height: 1.5;
+  line-height: 1.5;     /* 行高 */
 }
 
+/**
+ * textarea 聚焦状态
+ * 蓝色边框 + 蓝色阴影
+ */
 textarea:focus {
-  outline: none;
-  border-color: #2563EB;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  outline: none;  /* 移除默认聚焦轮廓 */
+  border-color: #2563EB;  /* 蓝色边框 */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);  /* 蓝色阴影环 */
 }
 
+/** textarea 占位符文字颜色 */
 textarea::placeholder {
   color: #9CA3AF;
 }
 
+/**
+ * 字符计数
+ * 右对齐、小号灰色文字
+ */
 .chars-count {
   text-align: right;
   font-size: 12px;
@@ -110,122 +209,181 @@ textarea::placeholder {
   margin-top: 6px;
 }
 
-/* Range slider */
+/* ============================================================================
+   滑块（Range Slider）样式
+   ============================================================================ */
+
+/**
+ * 滑块容器
+ * 使用 flexbox 居中对齐
+ */
 .range-control {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 12px;  /* 子元素间距 */
 }
 
+/** 滑块标签（慢/快、低/高） */
 .range-label {
   font-size: 13px;
   color: #6B7280;
-  min-width: 24px;
+  min-width: 24px;  /* 固定宽度保证对齐 */
 }
 
+/**
+ * 滑块输入框
+ * WebKit 浏览器自定义样式
+ */
 input[type="range"] {
-  flex: 1;
-  height: 6px;
-  -webkit-appearance: none;
-  background: #E5E7EB;
-  border-radius: 3px;
-  cursor: pointer;
+  flex: 1;                     /* 占满剩余空间 */
+  height: 6px;                /* 轨道高度 */
+  -webkit-appearance: none;   /* 移除默认样式 */
+  background: #E5E7EB;        /* 灰色轨道 */
+  border-radius: 3px;         /* 圆角 */
+  cursor: pointer;            /* 鼠标变为手型 */
 }
 
+/**
+ * 滑块滑块（拇指）
+ * WebKit 浏览器自定义样式
+ */
 input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  background: #FFFFFF;
-  border: 2px solid #2563EB;
-  border-radius: 50%;
-  cursor: pointer;
+  -webkit-appearance: none;    /* 移除默认样式 */
+  width: 18px;                 /* 宽度 */
+  height: 18px;               /* 高度 */
+  background: #FFFFFF;         /* 白色背景 */
+  border: 2px solid #2563EB;   /* 蓝色边框 */
+  border-radius: 50%;          /* 圆形 */
+  cursor: pointer;             /* 手型 */
+  
+  /* 过渡效果：缩放和阴影变化 */
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+/** 滑块悬停状态 */
 input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+  transform: scale(1.1);                    /* 放大 1.1 倍 */
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);  /* 蓝色阴影 */
 }
 
+/** 滑块按下状态 */
 input[type="range"]::-webkit-slider-thumb:active {
-  transform: scale(0.95);
+  transform: scale(0.95);  /* 缩小到 0.95 倍 */
 }
 
-/* Buttons */
+/* ============================================================================
+   按钮样式
+   ============================================================================ */
+
+/**
+ * 按钮组容器
+ * 垂直排列，间距 12px
+ */
 .btn-group {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin: 28px 0 20px;
+  margin: 28px 0 20px;  /* 上下边距 */
 }
 
+/**
+ * 按钮基础样式
+ */
 .btn {
-  width: 100%;
-  padding: 14px 24px;
-  font-size: 15px;
-  font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  width: 100%;               /* 占满容器宽度 */
+  padding: 14px 24px;        /* 内边距 */
+  font-size: 15px;           /* 字体大小 */
+  font-weight: 600;           /* 字体加粗 */
+  border: none;              /* 无边框 */
+  border-radius: 8px;        /* 圆角 */
+  cursor: pointer;           /* 手型 */
+  transition: all 0.2s ease; /* 过渡效果 */
 }
 
+/**
+ * 主按钮（蓝色背景）
+ * 用于"生成 MP3"
+ */
 .btn-primary {
-  background: #2563EB;
-  color: #FFFFFF;
+  background: #2563EB;  /* 蓝色背景 */
+  color: #FFFFFF;       /* 白色文字 */
 }
 
+/** 主按钮悬停状态 */
 .btn-primary:hover:not(:disabled) {
-  background: #1D4ED8;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  background: #1D4ED8;  /* 深蓝色 */
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);  /* 蓝色阴影 */
 }
 
+/** 主按钮按下状态 */
 .btn-primary:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.98);  /* 轻微缩小 */
 }
 
+/** 主按钮禁用状态（生成中） */
 .btn-primary:disabled {
-  background: #93C5FD;
-  cursor: not-allowed;
+  background: #93C5FD;  /* 浅蓝色 */
+  cursor: not-allowed; /* 禁用光标 */
 }
 
+/**
+ * 次按钮（白底蓝边框）
+ * 用于"保存 MP3"
+ */
 .btn-secondary {
-  background: #FFFFFF;
-  color: #2563EB;
-  border: 1.5px solid #2563EB;
+  background: #FFFFFF;  /* 白色背景 */
+  color: #2563EB;       /* 蓝色文字 */
+  border: 1.5px solid #2563EB;  /* 蓝色边框 */
 }
 
+/** 次按钮悬停状态 */
 .btn-secondary:hover {
-  background: #EFF6FF;
+  background: #EFF6FF;  /* 淡蓝色背景 */
 }
 
+/** 次按钮按下状态 */
 .btn-secondary:active {
-  transform: scale(0.98);
+  transform: scale(0.98);  /* 轻微缩小 */
 }
 
-/* Clear button row */
+/* ============================================================================
+   清空按钮样式
+   ============================================================================ */
+
+/** 清空按钮行：右对齐 */
 .clear-row {
   display: flex;
-  justify-content: flex-end;
-  margin-top: -8px;
-  margin-bottom: 16px;
+  justify-content: flex-end;  /* 右对齐 */
+  margin-top: -8px;          /* 负上边距，减少间距 */
+  margin-bottom: 16px;       /* 下边距 */
 }
 
+/**
+ * 清空按钮
+ * 小号文字、无边框、无背景
+ */
 .btn-clear {
-  font-size: 12px;
-  color: #9CA3AF;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 8px;
+  font-size: 12px;       /* 小号字体 */
+  color: #9CA3AF;        /* 灰色文字 */
+  background: none;       /* 无背景 */
+  border: none;          /* 无边框 */
+  cursor: pointer;        /* 手型 */
+  padding: 4px 8px;       /* 内边距 */
 }
 
+/** 清空按钮悬停状态 */
 .btn-clear:hover {
-  color: #6B7280;
+  color: #6B7280;  /* 深灰色 */
 }
 
-/* Status */
+/* ============================================================================
+   状态提示样式
+   ============================================================================ */
+
+/**
+ * 状态提示基础样式
+ * 圆角背景、内边距、居中文字
+ */
 .status {
   padding: 12px 16px;
   border-radius: 8px;
@@ -234,22 +392,32 @@ input[type="range"]::-webkit-slider-thumb:active {
   margin-top: 16px;
 }
 
+/** 信息状态：灰色背景、灰色文字 */
 .status-info {
   background: #F3F4F6;
   color: #6B7280;
 }
 
+/** 成功状态：绿色背景、绿色文字 */
 .status-success {
   background: #DCFCE7;
   color: #16A34A;
 }
 
+/** 错误状态：红色背景、红色文字 */
 .status-error {
   background: #FEE2E2;
   color: #DC2626;
 }
 
-/* Footer */
+/* ============================================================================
+   页脚样式
+   ============================================================================ */
+
+/**
+ * 页脚
+ * 居中、小号灰色文字
+ */
 .footer {
   text-align: center;
   padding: 20px;
@@ -257,32 +425,55 @@ input[type="range"]::-webkit-slider-thumb:active {
   color: #9CA3AF;
 }
 
-/* Responsive */
+/* ============================================================================
+   响应式设计
+   ============================================================================ */
+
+/**
+ * 移动端适配
+ * 减小内边距和字体大小
+ */
 @media (max-width: 640px) {
   #root {
-    padding: 20px 12px;
+    padding: 20px 12px;  /* 减小内边距 */
   }
 
   .card {
-    padding: 24px 20px;
-    border-radius: 10px;
+    padding: 24px 20px;   /* 减小内边距 */
+    border-radius: 10px;  /* 减小圆角 */
   }
 
   .header h1 {
-    font-size: 20px;
+    font-size: 20px;  /* 减小标题字体 */
   }
 }
-/* Audio player */
+
+/* ============================================================================
+   音频播放器样式
+   ============================================================================ */
+
+/**
+ * 音频播放器容器
+ * 上下边距 16px
+ */
 .audio-player {
   margin: 16px 0;
 }
 
+/**
+ * 音频播放器
+ * 100% 宽度，固定高度
+ */
 .audio-player audio {
   width: 100%;
   height: 44px;
-  border-radius: 8px;
+  border-radius: 8px;  /* 圆角 */
 }
 
+/**
+ * 音频播放器控制面板背景色
+ * WebKit 浏览器专用
+ */
 .audio-player audio::-webkit-media-controls-panel {
-  background: #F3F4F6;
+  background: #F3F4F6;  /* 浅灰色背景 */
 }
