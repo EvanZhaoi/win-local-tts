@@ -120,25 +120,48 @@ fn generate_unique_filename(temp_dir: &PathBuf, prefix: &str, ext: &str) -> Path
 }
 
 // ============================================================================
-// 函数：写入 PowerShell 脚本文件
+// 函数：写入 PowerShell 脚本文件（支持音色选择）
 // ============================================================================
 
 /// 将 PowerShell TTS 脚本写入临时文件
 ///
 /// 脚本使用 Windows System.Speech 命名空间进行文字转语音
+/// 支持选择指定的音色（如果提供了 voice 参数）
 ///
 /// # Arguments
 /// * `script_path` - 脚本文件路径
+/// * `voice`       - 可选的音色名称，如果为空则使用系统默认音色
 ///
 /// # Returns
 /// * `Ok(())` - 写入成功
 /// * `Err(String)` - 写入失败时的错误信息
-fn write_ps_script(script_path: &PathBuf) -> Result<(), String> {
+fn write_ps_script(script_path: &PathBuf, voice: Option<&str>) -> Result<(), String> {
     // PowerShell 脚本内容：
     // - 使用 System.Speech.Synthesis.SpeechSynthesizer
     // - 支持语速(Rate)和音量(Volume)参数
+    // - 如果指定了 voice，则调用 SelectVoice 选择音色
     // - 输出为 WAV 格式
-    let ps_content = r#"param(
+    let ps_content = if let Some(v) = voice {
+        format!(r#"param(
+    [string]$Text,
+    [string]$OutputPath,
+    [int]$Rate,
+    [int]$Volume
+)
+
+Add-Type -AssemblyName System.Speech
+$synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
+$synth.Rate = $Rate
+$synth.Volume = $Volume
+if ("{v}" -and "{v}".Trim().Length -gt 0) {{
+    $synth.SelectVoice("{v}")
+}}
+$synth.SetOutputToWaveFile($OutputPath)
+$synth.Speak($Text)
+$synth.Dispose()
+"#)
+    } else {
+        let default_script = r#"param(
     [string]$Text,
     [string]$OutputPath,
     [int]$Rate,
@@ -153,8 +176,68 @@ $synth.SetOutputToWaveFile($OutputPath)
 $synth.Speak($Text)
 $synth.Dispose()
 "#;
+        default_script.to_string()
+    };
 
     fs::write(script_path, ps_content).map_err(|e| format!("写入脚本失败: {}", e))
+}
+
+// ============================================================================
+// Tauri 命令：get_installed_voices - 获取系统已安装的音色列表
+// ============================================================================
+
+/// 获取 Windows 系统已安装的所有语音音色
+///
+/// 通过 PowerShell 调用 System.Speech.Synthesis.SpeechSynthesizer.GetInstalledVoices()
+/// 返回音色名称列表，供用户选择
+///
+/// # Returns
+/// * `Ok(Vec<String>)` - 音色名称列表
+/// * `Err(String)` - 获取失败时的错误信息
+#[tauri::command]
+fn get_installed_voices() -> Result<Vec<String>, String> {
+    // PowerShell 脚本：获取已安装的语音列表
+    let ps_script = r#"
+Add-Type -AssemblyName System.Speech
+$synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
+$synth.GetInstalledVoices() | ForEach-Object { $_.VoiceInfo.Name }
+$synth.Dispose()
+"#;
+
+    // 构建 PowerShell 命令
+    let mut command = Command::new("powershell.exe");
+    command
+        .args([
+            "-ExecutionPolicy", "Bypass",
+            "-NoProfile",
+            "-Command",
+            ps_script,
+        ]);
+    
+    // Windows 平台：隐藏控制台窗口
+    #[cfg(target_os = "windows")]
+    command.creation_flags(CREATE_NO_WINDOW);
+
+    // 执行命令并捕获输出
+    let output = command
+        .output()
+        .map_err(|e| format!("执行 PowerShell 失败: {}", e))?;
+
+    // 检查命令是否成功执行
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("获取音色列表失败: {}", stderr));
+    }
+
+    // 解析 stdout，按行分割成 Vec<String>
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let voices: Vec<String> = stdout
+        .lines()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    Ok(voices)
 }
 
 // ============================================================================
@@ -166,7 +249,7 @@ $synth.Dispose()
 /// 完整流程：
 /// 1. 参数验证（文字内容、长度、语速、音量范围）
 /// 2. 创建临时目录和文件路径
-/// 3. 写入 PowerShell 脚本
+/// 3. 写入 PowerShell 脚本（包含音色选择逻辑）
 /// 4. 调用 PowerShell 执行 TTS，生成 WAV 文件
 /// 5. 调用 ffmpeg 将 WAV 转换为 MP3
 /// 6. 清理临时文件，返回 MP3 路径
@@ -176,6 +259,7 @@ $synth.Dispose()
 /// * `text`  - 要转换的文字内容
 /// * `rate`  - 语速（-10 到 10）
 /// * `volume` - 音量（0 到 100）
+/// * `voice` - 可选的音色名称，为空时使用系统默认
 ///
 /// # Returns
 /// * `Ok(String)` - 生成的 MP3 文件完整路径
@@ -186,6 +270,7 @@ async fn generate_speech(
     text: String,
     rate: i32,
     volume: u32,
+    voice: Option<String>,
 ) -> Result<String, String> {
     // -------------------- 参数验证 --------------------
     
@@ -219,8 +304,9 @@ async fn generate_speech(
 
     // -------------------- 执行 TTS --------------------
     
-    // 写入 PowerShell 脚本到临时文件
-    write_ps_script(&script_path)?;
+    // 写入 PowerShell 脚本（传入音色参数）
+    let voice_opt = voice.as_deref().filter(|v| !v.trim().is_empty());
+    write_ps_script(&script_path, voice_opt)?;
 
     // 构建 PowerShell 命令
     // -ExecutionPolicy Bypass: 绕过执行策略限制
@@ -401,7 +487,8 @@ pub fn run() {
             generate_speech,      // 文字转语音
             save_audio,           // 保存音频文件
             read_audio_base64,    // 读取音频为 Base64
-            get_system_user       // 获取系统用户信息
+            get_system_user,      // 获取系统用户信息
+            get_installed_voices  // 获取系统已安装音色列表
         ])
         // 应用初始化回调
         .setup(|app| {

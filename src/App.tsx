@@ -5,7 +5,7 @@
  * ============================================================================
  * 
  * 功能：
- * - 文字输入和参数调节（语速、音量）
+ * - 文字输入和参数调节（语速、音量、音色）
  * - 调用 Rust 后端生成 MP3 音频
  * - 音频预览（base64 data URL）
  * - 保存 MP3 到用户指定位置
@@ -19,7 +19,7 @@
 // React 和 Tauri 依赖
 // ============================================================================
 
-import { useState } from "react";  // React 状态管理
+import { useState, useEffect } from "react";  // React 状态管理和副作用
 import { invoke } from "@tauri-apps/api/core";  // Tauri 命令调用
 import { save } from "@tauri-apps/plugin-dialog";  // Tauri 文件保存对话框
 
@@ -41,7 +41,6 @@ const APP_VERSION = "1.0.0";
  * 使用记录上报接口地址
  * 
  * 替换为真实地址后，上报会发送到业务服务器
- * 格式要求参考 REPORT_API_URL
  */
 const REPORT_API_URL = "https://your-server.example.com/api/tts/usage-report";
 
@@ -145,6 +144,12 @@ function App() {
   /** 音量：0（静音）到 100（最大），默认 100 */
   const [volume, setVolume] = useState(100);
   
+  /** 已安装的音色列表 */
+  const [voices, setVoices] = useState<string[]>([]);
+  
+  /** 当前选中的音色 */
+  const [voice, setVoice] = useState("");
+  
   /** 状态提示文字 */
   const [status, setStatus] = useState("");
   
@@ -156,6 +161,25 @@ function App() {
   
   /** 音频预览的 base64 data URL */
   const [audioUrl, setAudioUrl] = useState("");
+
+  // -------------------- 副作用：加载音色列表 --------------------
+
+  /**
+   * 应用启动时获取系统已安装的音色列表
+   */
+  useEffect(() => {
+    invoke<string[]>("get_installed_voices")
+      .then((list) => {
+        setVoices(list);
+        // 如果有音色列表，默认选择第一个
+        if (list.length > 0) {
+          setVoice(list[0]);
+        }
+      })
+      .catch((err) => {
+        console.warn("获取系统音色失败", err);
+      });
+  }, []);
 
   // -------------------- 事件处理函数 --------------------
 
@@ -175,7 +199,7 @@ function App() {
    * 
    * 完整流程：
    * 1. 参数验证（文字不能为空、长度限制）
-   * 2. 调用 Rust 后端 generate_speech 生成 MP3
+   * 2. 调用 Rust 后端 generate_speech 生成 MP3（传入音色参数）
    * 3. 调用 Rust 后端 read_audio_base64 读取音频为 base64
    * 4. 更新状态，显示预览和保存按钮
    * 5. 异步上报使用记录
@@ -205,6 +229,7 @@ function App() {
         text: text,
         rate: rate,
         volume: volume,
+        voice: voice || null,  // 如果没有选择音色，传 null 使用系统默认
       });
 
       setMp3Path(result);
@@ -315,6 +340,29 @@ function App() {
           <div className="chars-count">
             {text.length} / {MAX_TEXT_LENGTH}
           </div>
+        </div>
+
+        {/* 音色选择区域 */}
+        <div className="form-group">
+          <div className="form-label">
+            <span className="form-label-text">音色</span>
+          </div>
+          <select
+            className="voice-select"
+            value={voice}
+            onChange={(e) => setVoice(e.target.value)}
+            disabled={voices.length === 0}
+          >
+            {voices.length === 0 ? (
+              <option value="">使用系统默认音色</option>
+            ) : (
+              voices.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))
+            )}
+          </select>
         </div>
 
         {/* 语速控制区域 */}
