@@ -172,14 +172,21 @@ async fn read_audio_base64(path: String) -> Result<String, String> {
     Ok(encoded)
 }
 
+#[derive(serde::Serialize)]
+struct SystemUser {
+    username: String,
+    computer: String,
+}
+
 #[tauri::command]
-fn get_system_user() -> Result<String, String> {
-    if let Ok(user) = std::env::var("USERNAME") {
-        if !user.trim().is_empty() {
-            return Ok(user);
-        }
-    }
-    Ok("unknown".to_string())
+fn get_system_user() -> Result<SystemUser, String> {
+    let username = std::env::var("USERNAME").unwrap_or_else(|_| "unknown".to_string());
+    let computer = std::env::var("COMPUTERNAME").unwrap_or_else(|_| "unknown".to_string());
+
+    Ok(SystemUser {
+        username,
+        computer,
+    })
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
