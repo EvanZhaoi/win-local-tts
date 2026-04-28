@@ -9,6 +9,12 @@ use tauri::{AppHandle, Manager};
 use tauri::path::BaseDirectory;
 use base64::{engine::general_purpose, Engine as _};
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
+#[cfg(target_os = "windows")]
+const CREATE_NO_WINDOW: u32 = 0x08000000;
+
 /// 从 Tauri 资源目录或 Path 获取 ffmpeg 路径
 fn get_ffmpeg_path(app: &AppHandle) -> Result<PathBuf, String> {
     // 尝试多个可能的路径
@@ -105,7 +111,8 @@ async fn generate_speech(
     write_ps_script(&script_path)?;
 
     // 调用 PowerShell 执行脚本（参数传递 text，避免字符串拼接）
-    let ps_result = Command::new("powershell.exe")
+    let mut ps_command = Command::new("powershell.exe");
+    ps_command
         .args([
             "-ExecutionPolicy", "Bypass",
             "-NoProfile",
@@ -115,7 +122,11 @@ async fn generate_speech(
             "-OutputPath", wav_path.to_string_lossy().as_ref(),
             "-Rate", &rate.to_string(),
             "-Volume", &volume.to_string(),
-        ])
+        ]);
+    #[cfg(target_os = "windows")]
+    ps_command.creation_flags(CREATE_NO_WINDOW);
+
+    let ps_result = ps_command
         .output()
         .map_err(|e| format!("执行 PowerShell 失败: {}", e))?;
 
@@ -133,14 +144,19 @@ async fn generate_speech(
 
     // 调用 ffmpeg 转换
     let ffmpeg_path = get_ffmpeg_path(&app)?;
-    let ffmpeg_result = Command::new(&ffmpeg_path)
+    let mut ffmpeg_command = Command::new(&ffmpeg_path);
+    ffmpeg_command
         .args([
             "-y",
             "-i", wav_path.to_string_lossy().as_ref(),
             "-codec:a", "libmp3lame",
             "-b:a", "128k",
             mp3_path.to_string_lossy().as_ref(),
-        ])
+        ]);
+    #[cfg(target_os = "windows")]
+    ffmpeg_command.creation_flags(CREATE_NO_WINDOW);
+
+    let ffmpeg_result = ffmpeg_command
         .output()
         .map_err(|e| format!("ffmpeg 执行失败: {}", e))?;
 
